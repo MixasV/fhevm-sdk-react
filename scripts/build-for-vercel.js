@@ -1,8 +1,15 @@
 #!/usr/bin/env node
 
 const { execSync } = require('child_process')
+const path = require('path')
 
-console.log('🔨 Building packages for Vercel deployment...\n')
+// Ensure we're in the project root
+const projectRoot = path.resolve(__dirname, '..')
+process.chdir(projectRoot)
+
+console.log('🔨 Building packages for Vercel deployment...')
+console.log('📁 Working directory:', process.cwd())
+console.log()
 
 // List of packages to build (excluding fhevm-sdk which has build issues)
 const packages = [
@@ -25,7 +32,7 @@ for (const pkg of packages) {
     console.log(`📦 Building @mixaspro/${pkg}...`)
     execSync(`pnpm --filter @mixaspro/${pkg} build`, { 
       stdio: 'inherit',
-      cwd: __dirname + '/..'
+      cwd: projectRoot
     })
     successCount++
     console.log(`✓ @mixaspro/${pkg} built successfully\n`)
@@ -47,9 +54,12 @@ console.log('\n📦 Building examples...\n')
 try {
   execSync('node scripts/prepare-vercel.js', { 
     stdio: 'inherit',
-    cwd: __dirname + '/..'
+    cwd: projectRoot
   })
 } catch (error) {
   console.error('❌ Failed to prepare examples for Vercel')
   process.exit(1)
 }
+
+console.log('\n✅ All done! Deployment ready.')
+process.exit(0)

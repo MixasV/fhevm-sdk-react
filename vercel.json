@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd /vercel/path0 && node scripts/build-for-vercel.js",
+  "buildCommand": "node scripts/build-for-vercel.js",
   "outputDirectory": "public",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null
