@@ -37,7 +37,7 @@
   onMount(async () => {
     await initializeFHEVM({ 
       chainId: 11155111,
-      rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+      rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/tdHjNLQj6qDZOj8XlibqQEVxvKh_5Tqw',
       wasmPath: '/svelte-voting/wasm/'
     })
   })
@@ -174,7 +174,7 @@
   }
 
   .container {
-    max-width: 600px;
+    max-width: 900px;
     width: 90%;
     background: white;
     border-radius: 16px;

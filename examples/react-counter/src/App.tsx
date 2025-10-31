@@ -23,7 +23,7 @@ function App() {
     <FHEVMProvider 
       config={{ 
         chainId: 11155111,
-        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+        rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/tdHjNLQj6qDZOj8XlibqQEVxvKh_5Tqw',
         wasmPath: '/react-counter/wasm/'
       }}
       autoInit={true}
@@ -93,7 +93,8 @@ function Counter() {
 
       // STEP 3: Decrypt the result
       console.log('🔓 STEP 3: Decrypting result...')
-      const decrypted = await decrypt(encryptedResult)
+      console.log('Encrypted handle:', encryptedResult.handle)
+      const decrypted = await decrypt(encryptedResult.handle)
       setDecryptedCounter(Number(decrypted))
       console.log('✅ Decrypted value:', decrypted)
       
@@ -106,7 +107,11 @@ function Counter() {
   if (!isInitialized) {
     return (
       <div className="container">
-        <div className="loading">Initializing FHEVM...</div>
+        <div className="loading">
+          <div className="spinner"></div>
+          <p>Initializing FHEVM...</p>
+          <p className="loading-hint">Loading WASM modules, this may take a few seconds</p>
+        </div>
       </div>
     )
   }

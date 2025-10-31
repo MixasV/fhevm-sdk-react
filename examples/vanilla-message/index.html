@@ -88,7 +88,8 @@
       const client = new FHEVMClient()
       await client.initialize({
         chainId: 11155111,
-        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
+        rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/tdHjNLQj6qDZOj8XlibqQEVxvKh_5Tqw',
+        wasmPath: '/vanilla-message/wasm/'
       })
 
       app.innerHTML = `

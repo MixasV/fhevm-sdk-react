@@ -42,13 +42,29 @@ function PollContent() {
   const [txHash, setTxHash] = createSignal('')
   const [encryptedHandle, setEncryptedHandle] = createSignal<string | null>(null)
   const [decryptedVote, setDecryptedVote] = createSignal<bigint | null>(null)
+  const [connectedWallet, setConnectedWallet] = createSignal<any>(null)
 
   const handleConnect = async () => {
     try {
-      await wallet.connect((window as any).ethereum)
+      if (!(window as any).ethereum) {
+        alert('MetaMask not found! Please install MetaMask.')
+        return
+      }
+      
+      const client = fhevm.client()
+      if (!client) {
+        alert('FHEVM client not initialized')
+        return
+      }
+      
+      console.log('Connecting wallet...')
+      await client.connectWallet((window as any).ethereum)
+      const walletInfo = client.getWallet()
+      console.log('Wallet connected:', walletInfo)
+      setConnectedWallet(walletInfo)
     } catch (error) {
       console.error('Failed to connect:', error)
-      alert('Failed to connect wallet')
+      alert('Failed to connect wallet: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 
@@ -59,9 +75,15 @@ function PollContent() {
       return
     }
 
+    const client = fhevm.client()
+    if (!client) {
+      alert('FHEVM client not available')
+      return
+    }
+
     setIsVoting(true)
     try {
-      const encrypted = await encrypt.encrypt(choice, 'euint32')
+      const encrypted = await client.encrypt(choice, 'euint32')
       
       // Store handle for decryption
       if (encrypted && encrypted.handle) {
@@ -87,9 +109,23 @@ function PollContent() {
       return
     }
 
+    const client = fhevm.client()
+    if (!client) {
+      alert('FHEVM client not available')
+      return
+    }
+
     try {
-      const result = await decrypt.decrypt(handle)
-      setDecryptedVote(result as bigint)
+      const instance = client.getInstance()
+      if (!instance) {
+        throw new Error('FHEVM instance not available')
+      }
+      
+      const results = await instance.publicDecrypt([handle])
+      const handles = Object.keys(results)
+      if (handles.length > 0) {
+        setDecryptedVote(results[handles[0]] as bigint)
+      }
     } catch (error) {
       console.error('Decryption failed:', error)
       alert(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -116,7 +152,7 @@ function PollContent() {
 
       <Show when={fhevm.isInitialized()}>
         <Show
-          when={wallet.wallet()?.address}
+          when={connectedWallet()?.address}
           fallback={
             <div class="wallet-section">
               <button 
@@ -131,8 +167,8 @@ function PollContent() {
         >
           <div class="main-content">
             <div class="wallet-info">
-              <p><strong>Connected:</strong> {shortAddress(wallet.wallet()!.address)}</p>
-              <button onClick={() => wallet.disconnect()} class="btn btn-secondary">
+              <p><strong>Connected:</strong> {shortAddress(connectedWallet()!.address)}</p>
+              <button onClick={() => setConnectedWallet(null)} class="btn btn-secondary">
                 Disconnect
               </button>
             </div>
@@ -231,7 +267,7 @@ export default function App() {
     <FHEVMProvider
       config={{
         chainId: 11155111,
-        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+        rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/tdHjNLQj6qDZOj8XlibqQEVxvKh_5Tqw',
         wasmPath: '/solid-poll/wasm/'
       }}
       autoInit={true}

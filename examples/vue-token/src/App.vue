@@ -3,19 +3,26 @@
     <header>
       <h1>🪙 FHEVM Encrypted Token</h1>
       <p class="subtitle">Vue 3 + FHEVM SDK Example</p>
-      <p v-if="fhevm.network.value" class="network">
-        Network: {{ fhevm.network.value.name }}
+      <p v-if="fhevm.network?.name" class="network">
+        Network: {{ fhevm.network.name }}
       </p>
     </header>
 
-    <div v-if="!fhevm.isInitialized.value" class="loading">
-      Initializing FHEVM...
+    <div v-if="!fhevm.isInitialized" class="loading">
+      <div class="spinner"></div>
+      <p>Initializing FHEVM...</p>
+      <p class="loading-hint">Loading WASM modules, this may take a few seconds</p>
     </div>
 
     <template v-else>
-      <div v-if="!wallet.address.value" class="wallet-section">
+      <div v-if="!isConnected" class="wallet-section">
+        <div v-if="!hasMetaMask" class="error">
+          <p>⚠️ MetaMask not detected</p>
+          <p class="info">Please install MetaMask to connect your wallet</p>
+        </div>
         <button 
-          @click="wallet.connect((window as any).ethereum)" 
+          v-else
+          @click="handleConnect" 
           :disabled="wallet.isConnecting.value"
           class="btn btn-primary"
         >
@@ -25,8 +32,8 @@
 
       <div v-else class="main-content">
         <div class="wallet-info">
-          <p><strong>Connected:</strong> {{ shortAddress(wallet.address.value!) }}</p>
-          <button @click="wallet.disconnect" class="btn btn-secondary">
+          <p><strong>Connected:</strong> {{ shortAddress(connectedWallet?.address || wallet.value?.address || '') }}</p>
+          <button @click="handleDisconnect" class="btn btn-secondary">
             Disconnect
           </button>
         </div>
@@ -94,17 +101,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useFHEVM, useWallet, useEncrypt, useDecrypt } from '@mixaspro/vue'
 
-const fhevm = useFHEVM({
-  chainId: 11155111,
-  rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
-})
-
+const fhevm = useFHEVM()
 const wallet = useWallet()
 const encrypt = useEncrypt()
 const decrypt = useDecrypt()
+
+const hasMetaMask = computed(() => {
+  return typeof window !== 'undefined' && !!(window as any).ethereum
+})
+
+// Local wallet state (workaround for context not updating)
+const connectedWallet = ref<any>(null)
+const isConnected = computed(() => connectedWallet.value !== null || wallet.value?.address !== undefined)
 
 const balance = ref<string | null>(null)
 const recipient = ref('')
@@ -137,12 +148,53 @@ const TOKEN_ABI = [
 
 const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
 
+async function handleConnect() {
+  try {
+    if (!hasMetaMask.value) {
+      alert('MetaMask not found! Please install MetaMask.')
+      return
+    }
+    
+    if (!fhevm.isInitialized) {
+      alert('FHEVM is still initializing. Please wait a moment.')
+      return
+    }
+    
+    if (!fhevm.client) {
+      alert('FHEVM client not available.')
+      return
+    }
+    
+    console.log('Connecting wallet...')
+    await fhevm.client.connectWallet((window as any).ethereum)
+    
+    // Update local state
+    const walletInfo = fhevm.client.getWallet()
+    console.log('Wallet connected:', walletInfo)
+    connectedWallet.value = walletInfo
+  } catch (error) {
+    console.error('Failed to connect wallet:', error)
+    alert(`Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
+}
+
+function handleDisconnect() {
+  connectedWallet.value = null
+  balance.value = null
+  lastEncryptedHandle.value = null
+  decryptedBalance.value = null
+}
+
 async function handleViewBalance() {
   isViewing.value = true
   try {
+    if (!fhevm.client) {
+      throw new Error('FHEVM client not available')
+    }
+    
     // Encrypt a mock balance to demonstrate encryption
     const mockBalance = 1000
-    const encrypted = await encrypt.encrypt(mockBalance, 'euint64')
+    const encrypted = await fhevm.client.encrypt(mockBalance, 'euint64')
     
     // Store handle for decryption
     if (encrypted && encrypted.handle) {
@@ -152,7 +204,7 @@ async function handleViewBalance() {
     }
   } catch (error) {
     console.error('Failed to encrypt balance:', error)
-    alert('Failed to encrypt balance')
+    alert('Failed to encrypt balance: ' + (error instanceof Error ? error.message : 'Unknown error'))
   } finally {
     isViewing.value = false
   }
@@ -164,10 +216,23 @@ async function handleRevealBalance() {
     return
   }
 
+  if (!fhevm.client) {
+    alert('FHEVM client not available')
+    return
+  }
+
   try {
-    const result = await decrypt.decrypt(lastEncryptedHandle.value)
-    decryptedBalance.value = result as bigint
-    balance.value = decryptedBalance.value.toString()
+    const instance = fhevm.client.getInstance()
+    if (!instance) {
+      throw new Error('FHEVM instance not available')
+    }
+    
+    const results = await instance.publicDecrypt([lastEncryptedHandle.value])
+    const handles = Object.keys(results)
+    if (handles.length > 0) {
+      decryptedBalance.value = results[handles[0]] as bigint
+      balance.value = decryptedBalance.value.toString()
+    }
   } catch (error) {
     console.error('Failed to decrypt balance:', error)
     alert(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -180,9 +245,14 @@ async function handleTransfer() {
     return
   }
 
+  if (!fhevm.client) {
+    alert('FHEVM client not available')
+    return
+  }
+
   isTransferring.value = true
   try {
-    const encrypted = await encrypt.encrypt(amount.value, 'euint64')
+    const encrypted = await fhevm.client.encrypt(amount.value, 'euint64')
     
     // In real app, would call contract
     txHash.value = '0x1234...5678'
@@ -192,7 +262,7 @@ async function handleTransfer() {
     amount.value = 0
   } catch (error) {
     console.error('Transfer failed:', error)
-    alert('Transfer failed')
+    alert('Transfer failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
   } finally {
     isTransferring.value = false
   }
