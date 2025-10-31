@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { FHEVMService } from '@mixaspro/angular'
@@ -21,6 +21,8 @@ interface Bid {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+  private fhevm = inject(FHEVMService)
+  
   isInitialized = false
   walletAddress: string | null = null
   isConnecting = false
@@ -35,8 +37,6 @@ export class AppComponent implements OnInit {
     currentBid: '???',
     timeLeft: '2h 30m'
   }
-
-  constructor(private fhevm: FHEVMService) {}
 
   ngOnInit() {
     this.fhevm.initialize({

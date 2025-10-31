@@ -1,12 +1,9 @@
 import { bootstrapApplication } from '@angular/platform-browser'
-import { importProvidersFrom } from '@angular/core'
-import { BrowserModule } from '@angular/platform-browser'
+import { provideZoneChangeDetection } from '@angular/core'
 import { AppComponent } from './app/app.component'
-import { FHEVMService } from '@mixaspro/angular'
 
 bootstrapApplication(AppComponent, {
   providers: [
-    importProvidersFrom(BrowserModule),
-    FHEVMService
+    provideZoneChangeDetection({ eventCoalescing: true })
   ]
 }).catch(err => console.error(err))
