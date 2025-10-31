@@ -154,9 +154,9 @@ export function FHEVMProvider({
    * Auto-connect wallet
    */
   useEffect(() => {
-    if (autoConnect && isInitialized && wallet === null && typeof window !== 'undefined') {
+    if (autoConnect && isInitialized && wallet === null && typeof globalThis.window !== 'undefined') {
       // Check if ethereum provider is available
-      const windowWithEthereum = window as unknown as { ethereum?: unknown }
+      const windowWithEthereum = globalThis.window as unknown as { ethereum?: unknown }
       if (windowWithEthereum.ethereum !== undefined && windowWithEthereum.ethereum !== null) {
         connectWallet(windowWithEthereum.ethereum).catch((error) => {
           console.error('Failed to auto-connect wallet:', error)

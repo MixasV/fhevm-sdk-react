@@ -471,6 +471,23 @@ export class FHEVMClient {
   }
 
   /**
+   * Get FHEVM instance for advanced operations
+   * 
+   * @returns FhevmInstance or null if not initialized
+   * 
+   * @example
+   * ```typescript
+   * const instance = client.getInstance()
+   * if (instance) {
+   *   const decrypted = await instance.publicDecrypt(['0x...'])
+   * }
+   * ```
+   */
+  getInstance(): FhevmInstance | null {
+    return this.instance
+  }
+
+  /**
    * Check if client is initialized
    * 
    * @returns True if client is initialized

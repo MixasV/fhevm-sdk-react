@@ -172,6 +172,77 @@ input:disabled {
   font-family: 'Courier New', monospace;
 }
 
+.workflow-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f0f9ff;
+  border: 2px solid #0ea5e9;
+  border-radius: 12px;
+}
+
+.workflow-step {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.workflow-step:last-child {
+  margin-bottom: 0;
+}
+
+.workflow-step h3 {
+  color: #0ea5e9;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.encrypted-value {
+  padding: 1rem;
+  background: #f8fafc;
+  border-left: 4px solid #0ea5e9;
+  border-radius: 4px;
+  margin: 1rem 0;
+  word-break: break-all;
+}
+
+.encrypted-value code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #1e293b;
+}
+
+.info-small {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-top: 0.75rem;
+  line-height: 1.5;
+}
+
+.decrypted-result {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #f0fdf4;
+  border: 2px solid #22c55e;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.decrypted-result h4 {
+  color: #15803d;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.decrypted-value {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #15803d;
+  margin: 1rem 0;
+  text-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+}
+
 .info-section {
   margin-top: 2rem;
   padding: 1rem;
