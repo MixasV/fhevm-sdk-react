@@ -116,7 +116,7 @@ function PollContent() {
 
       <Show when={fhevm.isInitialized()}>
         <Show
-          when={wallet.address()}
+          when={wallet.wallet()?.address}
           fallback={
             <div class="wallet-section">
               <button 
@@ -131,7 +131,7 @@ function PollContent() {
         >
           <div class="main-content">
             <div class="wallet-info">
-              <p><strong>Connected:</strong> {shortAddress(wallet.address()!)}</p>
+              <p><strong>Connected:</strong> {shortAddress(wallet.wallet()!.address)}</p>
               <button onClick={() => wallet.disconnect()} class="btn btn-secondary">
                 Disconnect
               </button>
