@@ -1,10 +1,22 @@
 [build]
   command = "node scripts/build-for-vercel.js"
   publish = "public"
+  ignore = "git diff --quiet HEAD^ HEAD ."
 
 [build.environment]
   NODE_VERSION = "18"
   PNPM_VERSION = "8"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# Disable auto-installed plugins
+[build.processing]
+  skip_processing = false
+
+[[plugins]]
+  # Explicitly disable Next.js plugin
+  package = "@netlify/plugin-nextjs"
+  [plugins.inputs]
+    disabled = true
 
 [[redirects]]
   from = "/*"
