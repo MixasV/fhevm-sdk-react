@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { FHEVMService } from '@mixaspro/angular'
+import { FHEVMClient } from '@mixaspro/core'
 
 interface Bid {
   id: number
@@ -21,7 +21,7 @@ interface Bid {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  private fhevm = inject(FHEVMService)
+  private fhevm: FHEVMClient | null = null
   
   isInitialized = false
   walletAddress: string | null = null
@@ -38,19 +38,18 @@ export class AppComponent implements OnInit {
     timeLeft: '2h 30m'
   }
 
-  ngOnInit() {
-    this.fhevm.initialize({
-      chainId: 11155111,
-      rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
-    }).subscribe({
-      next: () => {
-        this.isInitialized = true
-      },
-      error: (err) => {
-        console.error('Failed to initialize:', err)
-        alert('Failed to initialize FHEVM')
-      }
-    })
+  async ngOnInit() {
+    try {
+      this.fhevm = new FHEVMClient()
+      await this.fhevm.initialize({
+        chainId: 11155111,
+        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
+      })
+      this.isInitialized = true
+    } catch (err) {
+      console.error('Failed to initialize:', err)
+      alert('Failed to initialize FHEVM')
+    }
   }
 
   async connectWallet() {
@@ -59,22 +58,24 @@ export class AppComponent implements OnInit {
       return
     }
 
+    if (!this.fhevm) {
+      alert('FHEVM not initialized')
+      return
+    }
+
     this.isConnecting = true
-    this.fhevm.connectWallet((window as any).ethereum).subscribe({
-      next: (wallet) => {
-        this.walletAddress = wallet.address
-        this.isConnecting = false
-      },
-      error: (err) => {
-        console.error('Connection failed:', err)
-        alert('Failed to connect wallet')
-        this.isConnecting = false
-      }
-    })
+    try {
+      const wallet = await this.fhevm.connectWallet((window as any).ethereum)
+      this.walletAddress = wallet.address
+    } catch (err) {
+      console.error('Connection failed:', err)
+      alert('Failed to connect wallet')
+    } finally {
+      this.isConnecting = false
+    }
   }
 
   disconnectWallet() {
-    this.fhevm.disconnectWallet()
     this.walletAddress = null
   }
 
@@ -84,17 +85,20 @@ export class AppComponent implements OnInit {
       return
     }
 
+    if (!this.fhevm) {
+      alert('FHEVM not initialized')
+      return
+    }
+
     this.isBidding = true
     
     try {
-      // Encrypt the bid
-      const encrypted = await this.fhevm.encrypt(this.bidAmount, 'euint64', undefined).toPromise()
+      const encrypted = await this.fhevm.encrypt(this.bidAmount, 'euint64')
       
       if (!encrypted) {
         throw new Error('Encryption failed')
       }
 
-      // Add to bids list
       const newBid: Bid = {
         id: this.bids.length + 1,
         timestamp: new Date(),
@@ -106,7 +110,6 @@ export class AppComponent implements OnInit {
       
       this.bids.unshift(newBid)
       
-      // Simulate confirmation
       setTimeout(() => {
         newBid.status = 'confirmed'
       }, 2000)
@@ -127,20 +130,35 @@ export class AppComponent implements OnInit {
       return
     }
 
+    if (!this.fhevm) {
+      alert('FHEVM not initialized')
+      return
+    }
+
     bid.isDecrypting = true
     
-    this.fhevm.decrypt(bid.encryptedHandle).subscribe({
-      next: (decrypted) => {
-        bid.decryptedAmount = decrypted as bigint
-        bid.amount = decrypted.toString()
-        bid.isDecrypting = false
-      },
-      error: (err) => {
-        console.error('Decryption failed:', err)
-        alert(`Failed to decrypt: ${err.message}`)
-        bid.isDecrypting = false
+    try {
+      const instance = this.fhevm.getInstance()
+      if (!instance) {
+        throw new Error('FHEVM instance not available')
       }
-    })
+
+      const results = await instance.publicDecrypt([bid.encryptedHandle])
+      const firstKey = Object.keys(results)[0]
+      
+      if (!firstKey) {
+        throw new Error('No decryption result')
+      }
+
+      const decrypted = results[firstKey] as bigint
+      bid.decryptedAmount = decrypted
+      bid.amount = decrypted.toString()
+    } catch (err: any) {
+      console.error('Decryption failed:', err)
+      alert(`Failed to decrypt: ${err.message}`)
+    } finally {
+      bid.isDecrypting = false
+    }
   }
 
   shortAddress(address: string): string {
