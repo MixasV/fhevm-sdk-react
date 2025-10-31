@@ -10,11 +10,7 @@
     encryptedData,
     writeContract,
     isWriting,
-    transactionReceipt,
-    decrypt,
-    isDecrypting,
-    decryptedData,
-    decryptionError
+    transactionReceipt
   } from '@mixaspro/svelte'
 
   const VOTING_ABI = [
@@ -37,8 +33,6 @@
   const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
 
   let selectedOption = 0
-  let lastEncryptedHandle: string | null = null
-  let decryptedVoteValue: bigint | null = null
 
   onMount(async () => {
     await initializeFHEVM({ 
@@ -61,11 +55,6 @@
       // Encrypt vote (0, 1, or 2 for option A, B, or C)
       const encrypted = await encrypt(selectedOption, 'euint32')
       
-      // Store handle for decryption demo
-      if (encrypted && encrypted.handle) {
-        lastEncryptedHandle = encrypted.handle
-      }
-      
       // Submit vote
       await writeContract({
         address: CONTRACT_ADDRESS,
@@ -77,22 +66,7 @@
       alert('Vote submitted successfully!')
     } catch (error) {
       console.error('Failed to vote:', error)
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)`)
-    }
-  }
-
-  async function handleDecryptVote() {
-    if (!lastEncryptedHandle) {
-      alert('No encrypted vote to decrypt. Please vote first.')
-      return
-    }
-
-    try {
-      const result = await decrypt(lastEncryptedHandle)
-      decryptedVoteValue = result as bigint
-    } catch (error) {
-      console.error('Failed to decrypt vote:', error)
-      alert(`Decryption Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 </script>
@@ -169,45 +143,14 @@
       {/if}
     </div>
 
-    {#if lastEncryptedHandle}
-      <div class="decrypt-section">
-        <h2>Step 2: Decrypt Your Vote</h2>
-        <p class="info">Decrypt to verify your encrypted vote value</p>
-
-        <button
-          on:click={handleDecryptVote}
-          disabled={$isDecrypting}
-          class="btn btn-secondary"
-        >
-          {$isDecrypting ? 'Decrypting...' : '🔓 Decrypt Vote'}
-        </button>
-
-        {#if $decryptionError}
-          <div class="error">
-            ❌ Decryption failed: {$decryptionError.message}
-          </div>
-        {/if}
-
-        {#if decryptedVoteValue !== null}
-          <div class="decrypted-result">
-            <h3>Decrypted Vote Value:</h3>
-            <p class="vote-value">{decryptedVoteValue.toString()}</p>
-            <p class="vote-label">
-              (Option {['A', 'B', 'C'][Number(decryptedVoteValue)] || 'Unknown'})
-            </p>
-          </div>
-        {/if}
-      </div>
-    {/if}
-
     <div class="info-section">
       <h3>How Private Voting Works:</h3>
       <ol>
         <li>Select your preferred option</li>
         <li>Vote is encrypted locally using FHE</li>
         <li>Encrypted vote is submitted to blockchain</li>
-        <li>Decrypt to verify your vote (demo only)</li>
-        <li>In production: votes remain private until reveal phase</li>
+        <li>Vote remains private until reveal phase</li>
+        <li>Results can be computed without decryption</li>
       </ol>
     </div>
   {/if}
@@ -374,63 +317,6 @@
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-family: 'Courier New', monospace;
-  }
-
-  .decrypt-section {
-    margin-top: 1.5rem;
-    padding: 1.5rem;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    background: #f8f9ff;
-  }
-
-  .btn-secondary {
-    background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
-    color: white;
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  .btn-secondary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(56, 178, 172, 0.4);
-  }
-
-  .error {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 8px;
-    color: #721c24;
-  }
-
-  .decrypted-result {
-    margin-top: 1.5rem;
-    padding: 1.5rem;
-    background: #d4edda;
-    border: 2px solid #c3e6cb;
-    border-radius: 8px;
-    text-align: center;
-  }
-
-  .decrypted-result h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
-    color: #155724;
-  }
-
-  .vote-value {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #155724;
-    margin: 0.5rem 0;
-  }
-
-  .vote-label {
-    font-size: 1.2rem;
-    color: #155724;
-    margin-top: 0.5rem;
   }
 
   .info-section {

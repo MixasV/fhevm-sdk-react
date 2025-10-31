@@ -14,15 +14,26 @@ const examples = [
   'fhevm-vanilla-message-example'
 ]
 
-try {
-  for (const example of examples) {
-    console.log(`Building ${example}...`)
+// Build examples with error handling
+const builtExamples = []
+for (const example of examples) {
+  console.log(`Building ${example}...`)
+  try {
     execSync(`pnpm --filter ${example} build`, { stdio: 'inherit' })
+    builtExamples.push(example)
+    console.log(`✓ ${example} built successfully`)
+  } catch (error) {
+    console.error(`⚠️ Failed to build ${example}:`, error.message)
+    console.log(`Skipping ${example}...`)
   }
-} catch (error) {
-  console.error('❌ Failed to build examples:', error.message)
+}
+
+if (builtExamples.length === 0) {
+  console.error('❌ No examples built successfully')
   process.exit(1)
 }
+
+console.log(`\n✓ Successfully built ${builtExamples.length}/${examples.length} examples`)
 
 const publicDir = path.join(__dirname, '..', 'public')
 const reactDist = path.join(__dirname, '..', 'examples', 'react-counter', 'dist')

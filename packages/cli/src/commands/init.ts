@@ -69,7 +69,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
     // Check if FHEVM is already configured
     const hasFHEVM = packageJson.dependencies && 
-                    Object.keys(packageJson.dependencies).some((dep: string) => dep.startsWith('@mixaspro-fhevm/'))
+                    Object.keys(packageJson.dependencies).some((dep: string) => dep.startsWith('@mixaspro/'))
 
     if (hasFHEVM && !options.force) {
       spinner.warn(chalk.yellow('FHEVM packages already installed'))
