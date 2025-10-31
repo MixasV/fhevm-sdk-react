@@ -13,6 +13,7 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "vercel-build": "node scripts/build-for-vercel.js",
     "chain": "pnpm hardhat:chain",
     "compile": "pnpm hardhat:compile",
     "deploy:localhost": "pnpm hardhat:deploy && pnpm generate",

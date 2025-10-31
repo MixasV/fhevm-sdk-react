@@ -1,6 +1,16 @@
 {
-  "buildCommand": "node scripts/build-for-vercel.js",
-  "outputDirectory": "public",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "framework": null
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "public"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    }
+  ]
 }
