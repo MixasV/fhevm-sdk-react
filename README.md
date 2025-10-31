@@ -1,6 +1,8 @@
-# FHEVM React Template
+# FHEVM SDK Pro - Universal FHEVM SDK
 
-A minimal React frontend template for building FHEVM-enabled decentralized applications (dApps). This template provides a simple development interface for interacting with FHEVM smart contracts, specifically the `FHECounter.sol` contract.
+🔥 **Live Demo:** https://fhevm-sdk-pro.netlify.app
+
+A universal FHEVM SDK with 7 framework adapters (React, Vue, Svelte, Solid, Angular, Next.js, Vanilla JS). Enterprise-grade SDK for building privacy-preserving dApps with Fully Homomorphic Encryption.
 
 ## 🚀 What is FHEVM?
 
