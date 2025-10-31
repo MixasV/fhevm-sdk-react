@@ -17,7 +17,6 @@ interface Bid {
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  providers: [FHEVMService],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
