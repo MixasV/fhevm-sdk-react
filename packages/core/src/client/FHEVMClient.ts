@@ -7,8 +7,9 @@
  */
 
 import { BrowserProvider, Contract, JsonRpcProvider, type Eip1193Provider } from 'ethers'
-import { initSDK, createInstance, SepoliaConfig, type FhevmInstance } from '@zama-fhe/relayer-sdk/web'
+import type { FhevmInstance } from '@zama-fhe/relayer-sdk/web'
 
+import { initSDK, getSDK } from './sdk-loader'
 import {
   ContractError,
   DecryptionError,
@@ -76,8 +77,16 @@ export class FHEVMClient {
     }
 
     try {
-      // Initialize FHEVM SDK
-      await initSDK()
+      // Initialize FHEVM SDK with optional WASM path
+      const initOptions: Parameters<typeof initSDK>[0] = {
+        thread: 1 // Disable workers to avoid CORS issues
+      }
+      if (config.wasmPath) {
+        // Pass URL strings directly as InitInput for WASM files
+        initOptions.tfheParams = `${config.wasmPath}tfhe_bg.wasm`
+        initOptions.kmsParams = `${config.wasmPath}kms_lib_bg.wasm`
+      }
+      await initSDK(initOptions)
 
       // Store config
       this.config = config
@@ -564,6 +573,8 @@ export class FHEVMClient {
     }
 
     try {
+      const sdk = getSDK()
+      
       // Use SepoliaConfig from relayer-sdk for Sepolia testnet
       // Or custom config for local/other networks
       let instanceConfig
@@ -571,13 +582,13 @@ export class FHEVMClient {
       if (this.config.chainId === 11155111) {
         // Sepolia - use pre-configured setup from relayer-sdk
         instanceConfig = {
-          ...SepoliaConfig,
+          ...sdk.SepoliaConfig,
           ...(this.config.rpcUrl && { network: this.config.rpcUrl }),
         }
       } else if (this.config.chainId === 31337) {
         // Hardhat local - use default config
         instanceConfig = {
-          ...SepoliaConfig, // Use Sepolia as base
+          ...sdk.SepoliaConfig, // Use Sepolia as base
           chainId: 31337,
           gatewayChainId: 31337,
           ...(this.config.rpcUrl && { network: this.config.rpcUrl }),
@@ -585,13 +596,13 @@ export class FHEVMClient {
       } else {
         // Other networks - use Sepolia config as fallback
         instanceConfig = {
-          ...SepoliaConfig,
+          ...sdk.SepoliaConfig,
           chainId: this.config.chainId,
           ...(this.config.rpcUrl && { network: this.config.rpcUrl }),
         }
       }
 
-      const instance = await createInstance(instanceConfig)
+      const instance = await sdk.createInstance(instanceConfig)
 
       return instance
     } catch (error) {

@@ -3,6 +3,12 @@ node_modules/
 .pnp
 .pnp.js
 
+# Deployment artifacts
+public-deploy.tar.gz
+angular-auction-deploy.zip
+local-deploy/
+deploy-angular/
+
 # Build outputs
 dist/
 build/
@@ -73,3 +79,5 @@ yarn.lock
 
 # PowerShell scripts (local only, not for GitHub)
 *.ps1
+# Local Netlify folder
+.netlify

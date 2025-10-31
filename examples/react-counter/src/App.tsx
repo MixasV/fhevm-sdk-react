@@ -23,7 +23,8 @@ function App() {
     <FHEVMProvider 
       config={{ 
         chainId: 11155111,
-        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
+        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+        wasmPath: '/react-counter/wasm/'
       }}
       autoInit={true}
     >

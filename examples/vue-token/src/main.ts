@@ -8,6 +8,7 @@ const app = createApp(App)
 app.use(createFHEVMPlugin({
   chainId: 11155111,
   rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+  wasmPath: '/vue-token/wasm/',
   autoInitialize: true,
 }))
 

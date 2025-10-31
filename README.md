@@ -1,96 +1,188 @@
-# FHEVM SDK Pro - Universal FHEVM SDK
+# FHEVM SDK Pro - Complete FHEVM Development Suite
 
 🔥 **Live Demo:** https://fhevm-sdk-pro.netlify.app
 
-A universal FHEVM SDK with 7 framework adapters (React, Vue, Svelte, Solid, Angular, Next.js, Vanilla JS). Enterprise-grade SDK for building privacy-preserving dApps with Fully Homomorphic Encryption.
+A **complete, production-ready FHEVM development suite** with:
+- 🎯 **Universal SDK** - Framework-agnostic core with adapters for React, Vue 3, Svelte, Solid.js, Angular
+- ⚡ **CLI Tool** - Scaffold new projects and generate type-safe code
+- 🔧 **DevTools** - Browser extension for debugging FHEVM apps
+- 🧪 **Testing Suite** - Mocks, fixtures, and utilities for testing
+- 📦 **Hardhat Integration** - Smart contract development with Zama's FHEVM
+- 🚀 **Next.js Template** - Production-ready app template
 
 ## 🚀 What is FHEVM?
 
-FHEVM (Fully Homomorphic Encryption Virtual Machine) enables computation on encrypted data directly on Ethereum. This template demonstrates how to build dApps that can perform computations while keeping data private.
+FHEVM (Fully Homomorphic Encryption Virtual Machine) enables **computation on encrypted data** directly on Ethereum. Build dApps that perform operations on private data without ever exposing it to the blockchain.
 
 ## ✨ Features
 
-- **🔐 FHEVM Integration**: Built-in support for fully homomorphic encryption
-- **⚛️ React + Next.js**: Modern, performant frontend framework
-- **🎨 Tailwind CSS**: Utility-first styling for rapid UI development
-- **🔗 RainbowKit**: Seamless wallet connection and management
-- **🌐 Multi-Network Support**: Works on both Sepolia testnet and local Hardhat node
-- **📦 Monorepo Structure**: Organized packages for SDK, contracts, and frontend
+### 🎯 Core SDK (`@mixaspro/core`)
+- **🔐 Complete FHEVM Integration**: Full encryption/decryption workflow
+- **🔗 Wallet Management**: MetaMask, WalletConnect, and EIP-6963 support
+- **⚡ Optimized Performance**: Dynamic SDK loading, minimal bundle size (~440KB)
+- **🛡️ Type-Safe**: Full TypeScript support with strict types
+- **🌐 Multi-Network**: Sepolia testnet and local Hardhat support
 
-## 📋 Prerequinextjss
+### 🎨 Framework Adapters
+- **⚛️ React** (`@mixaspro/react`): Hooks-based API with composable patterns
+- **🟢 Vue 3** (`@mixaspro/vue`): Composition API with reactive stores
+- **🔴 Svelte** (`@mixaspro/svelte`): Store-based reactivity
+- **🔷 Solid.js** (`@mixaspro/solid`): Fine-grained reactive primitives
+- **🅰️ Angular** (`@mixaspro/angular`): Service-based architecture
+- **⚡ Vanilla JS** (`@mixaspro/core`): Zero dependencies, pure JavaScript
+
+### 📦 Monorepo Structure
+- **Unified API**: Consistent encryption/decryption patterns across all frameworks
+- **Tree-shakeable**: Import only what you need
+- **Examples Included**: 6 working examples demonstrating each framework
+
+## 📋 Prerequisites
 
 Before you begin, ensure you have:
 
 - **Node.js** (v18 or higher)
-- **pnpm** package manager
+- **pnpm** package manager (`npm install -g pnpm`)
 - **MetaMask** browser extension
 - **Git** for cloning the repository
 
 ## 🛠️ Quick Start
 
-### 1. Clone and Setup
+### 1. Installation
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd fhevm-react-template
-
-# Initialize submodules (includes fhevm-hardhat-template)
-git submodule update --init --recursive
+git clone https://github.com/yourusername/fhevm-sdk-pro.git
+cd fhevm-sdk-pro
 
 # Install dependencies
 pnpm install
+
+# Build all packages
+pnpm build
 ```
 
-### 2. Environment Configuration
-
-Set up your Hardhat environment variables by following the [FHEVM documentation](https://docs.zama.ai/protocol/solidity-guides/getting-started/setup#set-up-the-hardhat-configuration-variables-optional):
-
-- `MNEMONIC`: Your wallet mnemonic phrase
-- `INFURA_API_KEY`: Your Infura API key for Sepolia
-
-### 3. Start Development Environment
-
-**Option A: Local Development (Recommended for testing)**
+### 2. Run Examples Locally
 
 ```bash
-# Terminal 1: Start local Hardhat node
-pnpm chain
-# RPC URL: http://127.0.0.1:8545 | Chain ID: 31337
+# Build all 6 examples
+pnpm -r --filter "./examples/*" run build
 
-# Terminal 2: Deploy contracts to localhost
-pnpm deploy:localhost
+# Start local server (from project root)
+cd local-deploy
+python -m http.server 8080
 
-# Terminal 3: Start the frontend
-pnpm start
+# Open http://localhost:8080 in your browser
 ```
 
-**Option B: Sepolia Testnet**
+### 3. Try Individual Examples
+
+Each example can be run independently:
 
 ```bash
-# Deploy to Sepolia testnet
-pnpm deploy:sepolia
+# React Counter
+cd examples/react-counter
+pnpm dev
 
-# Start the frontend
+# Vue Token
+cd examples/vue-token
+pnpm dev
+
+# Svelte Voting
+cd examples/svelte-voting
+pnpm dev
+
+# Solid Poll
+cd examples/solid-poll
+pnpm dev
+
+# Angular Auction
+cd examples/angular-auction
 pnpm start
+
+# Vanilla Message
+cd examples/vanilla-message
+pnpm dev
 ```
 
-### 4. Connect MetaMask
+## 💻 Usage Examples
 
-1. Open [http://localhost:3000](http://localhost:3000) in your browser
-2. Click "Connect Wallet" and select MetaMask
-3. If using localhost, add the Hardhat network to MetaMask:
-   - **Network Name**: Hardhat Local
-   - **RPC URL**: `http://127.0.0.1:8545`
-   - **Chain ID**: `31337`
-   - **Currency Symbol**: `ETH`
+### React
 
-### ⚠️ Sepolia Production note
+```typescript
+import { FHEVMProvider, useFHEVM, useWallet, useEncrypt } from '@mixaspro/react'
 
-- In production, `NEXT_PUBLIC_ALCHEMY_API_KEY` must be set (see `packages/nextjs/scaffold.config.ts`). The app throws if missing.
-- Ensure `packages/nextjs/contracts/deployedContracts.ts` points to your live contract addresses.
-- Optional: set `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` for better WalletConnect reliability.
-- Optional: add per-chain RPCs via `rpcOverrides` in `packages/nextjs/scaffold.config.ts`.
+function App() {
+  return (
+    <FHEVMProvider config={{ chainId: 11155111, rpcUrl: '...' }}>
+      <Counter />
+    </FHEVMProvider>
+  )
+}
+
+function Counter() {
+  const { isInitialized } = useFHEVM()
+  const { wallet, connect } = useWallet()
+  const { encrypt } = useEncrypt()
+  
+  const handleEncrypt = async () => {
+    const encrypted = await encrypt(42, 'euint32')
+    console.log('Encrypted:', encrypted.handle)
+  }
+}
+```
+
+### Vue 3
+
+```vue
+<script setup>
+import { useFHEVM, useWallet, useEncrypt } from '@mixaspro/vue'
+
+const fhevm = useFHEVM()
+const wallet = useWallet()
+const encrypt = useEncrypt()
+
+async function handleEncrypt() {
+  const encrypted = await encrypt.encrypt(100, 'euint32')
+  console.log('Encrypted:', encrypted.handle)
+}
+</script>
+```
+
+### Angular
+
+```typescript
+import { FHEVMClient } from '@mixaspro/core'
+
+export class AppComponent {
+  private fhevm = new FHEVMClient()
+  
+  async ngOnInit() {
+    await this.fhevm.initialize({
+      chainId: 11155111,
+      rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+      wasmPath: '/assets/wasm/'
+    })
+    
+    const encrypted = await this.fhevm.encrypt(42, 'euint32')
+  }
+}
+```
+
+### Vanilla JS
+
+```javascript
+import { FHEVMClient } from '@mixaspro/core'
+
+const client = new FHEVMClient()
+
+await client.initialize({
+  chainId: 11155111,
+  rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
+})
+
+const encrypted = await client.encrypt(42, 'euint32')
+console.log('Handle:', encrypted.handle)
+```
 
 ## 🔧 Troubleshooting
 
@@ -123,33 +215,129 @@ For more details, see the [MetaMask development guide](https://docs.metamask.io/
 
 ## 📁 Project Structure
 
-This template uses a monorepo structure with three main packages:
+Complete monorepo with 12 packages:
 
 ```
-fhevm-react-template/
+fhevm-sdk-pro/
 ├── packages/
-│   ├── fhevm-hardhat-template/    # Smart contracts & deployment
-│   ├── fhevm-sdk/                 # FHEVM SDK package
-│   └── nextjs/                      # React frontend application
-└── scripts/                       # Build and deployment scripts
+│   ├── core/                   # @mixaspro/core - Core SDK (framework-agnostic)
+│   │   ├── client/             # FHEVMClient, wallet management
+│   │   ├── encryption/         # Encryption/decryption workflow
+│   │   └── types/              # TypeScript type definitions
+│   │
+│   ├── react/                  # @mixaspro/react - React hooks & components
+│   ├── vue/                    # @mixaspro/vue - Vue 3 composables
+│   ├── svelte/                 # @mixaspro/svelte - Svelte stores
+│   ├── solid/                  # @mixaspro/solid - Solid.js signals
+│   ├── angular/                # @mixaspro/angular - Angular services
+│   │
+│   ├── cli/                    # @mixaspro/cli - Project scaffolding tool
+│   ├── devtools/               # @mixaspro/devtools - Browser DevTools extension
+│   ├── testing/                # @mixaspro/testing - Testing utilities & mocks
+│   │
+│   ├── hardhat/                # Smart contract development (Zama FHEVM)
+│   ├── nextjs/                 # Next.js production template
+│   └── fhevm-sdk/              # Legacy SDK (deprecated)
+│
+├── examples/
+│   ├── react-counter/          # React: Private counter
+│   ├── vue-token/              # Vue 3: Token balance
+│   ├── svelte-voting/          # Svelte: Anonymous voting
+│   ├── solid-poll/             # Solid.js: Private poll
+│   ├── angular-auction/        # Angular: Blind auction
+│   └── vanilla-message/        # Vanilla JS: Secret messages
+│
+└── docs/                       # Documentation & guides
 ```
 
-### Key Components
+### Package Architecture
 
-#### 🔗 FHEVM Integration (`packages/nextjs/hooks/fhecounter-example/`)
-- **`useFHECounterWagmi.tsx`**: Example hook demonstrating FHEVM contract interaction
-- Essential hooks for FHEVM-enabled smart contract communication
-- Easily copyable to any FHEVM + React project
+```
+         @mixaspro/core (Foundation)
+                 │
+      ┌──────────┼──────────┐
+      │          │          │
+   Framework  Developer  Smart
+   Adapters    Tools    Contracts
+      │          │          │
+   ┌──┴──┬───┬───┴───┬──┐   │
+react vue svelte cli testing hardhat
+       solid angular devtools nextjs
+```
 
-#### 🎣 Wallet Management (`packages/nextjs/hooks/helper/`)
-- MetaMask wallet provider hooks
-- Compatible with EIP-6963 standard
-- Easily adaptable for other wallet providers
+## 🎯 Core Packages
 
-#### 🔧 Flexibility
-- Replace `ethers.js` with `Wagmi` or other React-friendly libraries
-- Modular architecture for easy customization
-- Support for multiple wallet providers
+### Framework Adapters
+
+| Package | Description | Features |
+|---------|-------------|----------|
+| `@mixaspro/core` | Framework-agnostic SDK | FHEVMClient, encryption, wallet management |
+| `@mixaspro/react` | React integration | Hooks: `useFHEVM`, `useWallet`, `useEncrypt` |
+| `@mixaspro/vue` | Vue 3 integration | Composables with Composition API |
+| `@mixaspro/svelte` | Svelte integration | Reactive stores |
+| `@mixaspro/solid` | Solid.js integration | Fine-grained signals |
+| `@mixaspro/angular` | Angular integration | Injectable services |
+
+### Developer Tools
+
+| Package | Description | Use Case |
+|---------|-------------|----------|
+| `@mixaspro/cli` | Scaffolding tool | `npx @mixaspro/cli create my-app` |
+| `@mixaspro/devtools` | Browser extension | Debug encrypted data, inspect transactions |
+| `@mixaspro/testing` | Testing utilities | Mock FHEVM, fixtures for unit tests |
+
+### Infrastructure
+
+| Package | Description | Purpose |
+|---------|-------------|---------|
+| `hardhat` | Smart contracts | Zama FHEVM contract development |
+| `nextjs` | Production template | Full-stack Next.js app with FHEVM |
+
+## ⚡ CLI Usage
+
+Create a new project in seconds:
+
+```bash
+# Interactive project creation
+npx @mixaspro/cli create my-fhevm-app
+
+# Choose framework: React | Vue | Svelte | Solid | Angular
+# Auto-installs dependencies and sets up project structure
+
+cd my-fhevm-app
+pnpm dev
+```
+
+Generate type-safe contract bindings:
+
+```bash
+# Generate TypeScript types from ABIs
+npx @mixaspro/cli generate --contracts ./contracts
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Make your changes
+4. Run tests: `pnpm test`
+5. Build packages: `pnpm build`
+6. Submit a pull request
+
+### Running Tests
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests for specific package
+pnpm --filter @mixaspro/core test
+pnpm --filter @mixaspro/react test
+```
 
 ## 📚 Additional Resources
 

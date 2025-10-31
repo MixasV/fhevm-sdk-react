@@ -71,6 +71,7 @@ export interface FHEVMConfig {
   readonly gatewayUrl?: string
   readonly aclAddress?: string
   readonly kmsVerifierAddress?: string
+  readonly wasmPath?: string
 }
 
 /**

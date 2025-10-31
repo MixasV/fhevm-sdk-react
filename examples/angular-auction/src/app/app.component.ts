@@ -43,7 +43,8 @@ export class AppComponent implements OnInit {
       this.fhevm = new FHEVMClient()
       await this.fhevm.initialize({
         chainId: 11155111,
-        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
+        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+        wasmPath: '/angular-auction/assets/wasm/'
       })
       this.isInitialized = true
     } catch (err) {

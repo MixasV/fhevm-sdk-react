@@ -149,6 +149,7 @@ h1 {
   border: 2px solid #fed7aa;
   border-radius: 8px;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .input:focus {
