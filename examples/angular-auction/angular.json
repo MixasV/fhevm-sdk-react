@@ -17,7 +17,19 @@
             "main": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/favicon.ico"],
+            "assets": [
+              "src/favicon.ico",
+              {
+                "glob": "**/*.wasm",
+                "input": "../../node_modules/.pnpm/@zama-fhe+relayer-sdk@0.2.0_ffe09311f738ce71166f333b8c514bfc/node_modules/@zama-fhe/relayer-sdk/lib",
+                "output": "/"
+              },
+              {
+                "glob": "**/*.wasm",
+                "input": "../../node_modules/.pnpm/tfhe@1.3.0/node_modules/tfhe",
+                "output": "/"
+              }
+            ],
             "styles": ["src/styles.css"],
             "scripts": []
           },
