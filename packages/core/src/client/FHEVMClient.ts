@@ -186,36 +186,71 @@ export class FHEVMClient {
       throw new ValidationError('Value cannot be null or undefined')
     }
 
+    // Validate contract address and user address for encryption
+    const contractAddress = options?.contractAddress || '0x0000000000000000000000000000000000000000'
+    const userAddress = options?.userAddress || this.wallet?.address || '0x0000000000000000000000000000000000000000'
+
     try {
-      let encryptedValue: Uint8Array
+      // Create encrypted input using relayer-sdk
+      const encryptedInput = this.instance.createEncryptedInput(contractAddress, userAddress)
 
-      // Encrypt based on type
-      // Note: Using generic encryption method - actual fhevmjs API may differ
-      const numValue = typeof value === 'bigint' ? Number(value) : 
-                       typeof value === 'boolean' ? (value ? 1 : 0) : 
-                       value as number
-      
-      if (typeof numValue !== 'number') {
-        throw new ValidationError(`Cannot convert value to number for encryption`)
-      }
-      
-      // Create mock encrypted value (real implementation would use fhevmjs)
-      encryptedValue = new Uint8Array(32)
-      if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-        crypto.getRandomValues(encryptedValue)
+      // Add value based on type
+      switch (type) {
+        case 'ebool':
+          encryptedInput.addBool(value)
+          break
+        case 'euint8':
+          encryptedInput.add8(typeof value === 'boolean' ? (value ? 1 : 0) : value)
+          break
+        case 'euint16':
+          encryptedInput.add16(typeof value === 'boolean' ? (value ? 1 : 0) : value)
+          break
+        case 'euint32':
+          encryptedInput.add32(typeof value === 'boolean' ? (value ? 1 : 0) : value)
+          break
+        case 'euint64':
+          encryptedInput.add64(typeof value === 'boolean' ? (value ? 1 : 0) : value)
+          break
+        case 'euint128':
+          encryptedInput.add128(typeof value === 'boolean' ? (value ? 1 : 0) : value)
+          break
+        case 'euint256':
+          encryptedInput.add256(typeof value === 'boolean' ? (value ? 1 : 0) : value)
+          break
+        case 'eaddress':
+          if (typeof value === 'string') {
+            encryptedInput.addAddress(value)
+          } else {
+            throw new ValidationError('Address type requires string value')
+          }
+          break
+        default:
+          throw new ValidationError(`Unsupported encrypted type: ${type}`)
       }
 
-      // Generate handle (simulated - in real FHEVM this comes from blockchain)
-      const handle = this.generateHandle()
+      // Encrypt using relayer-sdk
+      const encryptionResult = await encryptedInput.encrypt()
+
+      // Get the first handle (most common case - single value encryption)
+      const handle = encryptionResult.handles[0]
+      if (!handle) {
+        throw new EncryptionError('Encryption did not return a handle')
+      }
+
+      // Convert handle to hex string
+      const handleHex = '0x' + Array.from(handle)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
 
       return {
         type,
-        value: encryptedValue,
-        handle,
+        value: handle,
+        handle: handleHex,
+        inputProof: encryptionResult.inputProof,
         metadata: {
           encryptedAt: Date.now(),
-          contractAddress: options?.contractAddress,
-          userAddress: options?.userAddress,
+          contractAddress,
+          userAddress,
         },
       }
     } catch (error) {

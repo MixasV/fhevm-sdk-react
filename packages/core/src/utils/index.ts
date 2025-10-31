@@ -29,6 +29,7 @@ export function isValidEncryptedType(type: string): type is EncryptedType {
     'euint64',
     'euint128',
     'euint256',
+    'eaddress',
   ]
   return validTypes.includes(type as EncryptedType)
 }

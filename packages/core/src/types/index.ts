@@ -22,6 +22,7 @@ export type EncryptedType =
   | 'euint64'
   | 'euint128'
   | 'euint256'
+  | 'eaddress'
 
 /**
  * Encrypted value representation
@@ -30,6 +31,7 @@ export interface EncryptedValue {
   readonly type: EncryptedType
   readonly value: Uint8Array
   readonly handle?: string
+  readonly inputProof?: Uint8Array
   readonly metadata?: Record<string, unknown>
 }
 
