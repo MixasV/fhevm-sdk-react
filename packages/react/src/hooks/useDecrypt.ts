@@ -109,17 +109,16 @@ export function useDecrypt(): UseDecryptReturn {
       setError(null)
 
       try {
-        // Use relayer-sdk publicDecrypt
-        const handle = typeof ciphertext === 'string' ? ciphertext : ciphertext
-        const results = await instance.publicDecrypt([handle])
+        // publicDecrypt expects array of handles (string | Uint8Array)
+        const results = await instance.publicDecrypt([ciphertext])
         
-        // Get first result
-        const firstKey = Object.keys(results)[0]
-        if (!firstKey) {
+        // Results is an object with handles as keys
+        const handles = Object.keys(results)
+        if (handles.length === 0) {
           throw new Error('No decryption result returned')
         }
         
-        const value = results[firstKey]
+        const value = results[handles[0]]
         setData(value as bigint | boolean)
         return value as bigint | boolean
       } catch (err) {

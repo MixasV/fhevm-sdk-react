@@ -1,6 +1,6 @@
 # FHEVM SDK Pro - Complete FHEVM Development Suite
 
-🔥 **Live Demo:** https://fhevm-sdk-pro.netlify.app
+🔥 **Live Demo:** https://fhevm.mixas.pro/
 
 A **complete, production-ready FHEVM development suite** with:
 - 🎯 **Universal SDK** - Framework-agnostic core with adapters for React, Vue 3, Svelte, Solid.js, Angular

@@ -74,7 +74,7 @@ export function createFHEVMPlugin(options: FHEVMPluginOptions): Plugin {
       context.network = fhevmClient.getNetwork()
 
       // Auto-connect if requested
-      const windowWithEthereum = window as unknown as { ethereum?: unknown }
+      const windowWithEthereum = (typeof window !== 'undefined' ? window : {}) as unknown as { ethereum?: unknown }
       if (options.autoConnect === true && windowWithEthereum.ethereum !== null && windowWithEthereum.ethereum !== undefined) {
         try {
           const walletInfo = await fhevmClient.connectWallet(windowWithEthereum.ethereum as Parameters<typeof fhevmClient.connectWallet>[0])

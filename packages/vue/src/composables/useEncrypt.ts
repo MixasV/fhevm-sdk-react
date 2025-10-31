@@ -15,19 +15,19 @@ import { useFHEVM } from './useFHEVM'
  */
 export interface UseEncryptReturn {
   /**
-   * Encrypted data
+   * Encrypted data (ref)
    */
-  data: EncryptedValue | null
+  data: import('vue').Ref<EncryptedValue | null>
 
   /**
-   * Whether encryption is in progress
+   * Whether encryption is in progress (ref)
    */
-  isEncrypting: boolean
+  isEncrypting: import('vue').Ref<boolean>
 
   /**
-   * Encryption error if any
+   * Encryption error if any (ref)
    */
-  error: Error | null
+  error: import('vue').Ref<Error | null>
 
   /**
    * Encrypt a value
@@ -118,9 +118,9 @@ export function useEncrypt(): UseEncryptReturn {
   }
 
   return {
-    data: data.value,
-    isEncrypting: isEncrypting.value,
-    error: error.value,
+    data,
+    isEncrypting,
+    error,
     encrypt,
     reset,
   }

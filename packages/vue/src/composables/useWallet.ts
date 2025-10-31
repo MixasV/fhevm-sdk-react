@@ -22,24 +22,24 @@ export interface Eip1193Provider {
  */
 export interface UseWalletReturn {
   /**
-   * Connected wallet info
+   * Connected wallet info (computed ref)
    */
-  wallet: WalletInfo | null
+  wallet: import('vue').ComputedRef<WalletInfo | null>
 
   /**
-   * Whether wallet is connected
+   * Whether wallet is connected (computed ref)
    */
-  isConnected: boolean
+  isConnected: import('vue').ComputedRef<boolean>
 
   /**
-   * Whether wallet is connecting
+   * Whether wallet is connecting (ref)
    */
-  isConnecting: boolean
+  isConnecting: import('vue').Ref<boolean>
 
   /**
-   * Connection error if any
+   * Connection error if any (ref)
    */
-  error: Error | null
+  error: import('vue').Ref<Error | null>
 
   /**
    * Connect wallet
@@ -122,10 +122,10 @@ export function useWallet(): UseWalletReturn {
   }
 
   return {
-    wallet: contextWallet,
-    isConnected: isConnected.value,
-    isConnecting: isConnecting.value,
-    error: error.value,
+    wallet: computed(() => contextWallet),
+    isConnected,
+    isConnecting,
+    error,
     connect,
     disconnect,
   }

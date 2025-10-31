@@ -13,19 +13,19 @@ import { useFHEVM } from './useFHEVM'
  */
 export interface UseDecryptReturn {
   /**
-   * Decrypted data
+   * Decrypted data (ref)
    */
-  data: bigint | boolean | null
+  data: import('vue').Ref<bigint | boolean | null>
 
   /**
-   * Whether decryption is in progress
+   * Whether decryption is in progress (ref)
    */
-  isDecrypting: boolean
+  isDecrypting: import('vue').Ref<boolean>
 
   /**
-   * Decryption error if any
+   * Decryption error if any (ref)
    */
-  error: Error | null
+  error: import('vue').Ref<Error | null>
 
   /**
    * Decrypt a ciphertext
@@ -120,9 +120,9 @@ export function useDecrypt(): UseDecryptReturn {
   }
 
   return {
-    data: data.value,
-    isDecrypting: isDecrypting.value,
-    error: error.value,
+    data,
+    isDecrypting,
+    error,
     decrypt,
     reset,
   }
