@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: fhevm-examples
+    env: static
+    buildCommand: echo "Already built"
+    staticPublishPath: ./local-deploy
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
