@@ -9,3 +9,10 @@
 # Disable all auto-detection
 [build.processing]
   skip_processing = true
+
+# CORS headers for WebAssembly SharedArrayBuffer
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
