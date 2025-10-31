@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FHEVM Secret Message - Vanilla JS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 { color: #1f2937; margin-bottom: 0.5rem; }
+    .subtitle { color: #6b7280; margin-bottom: 2rem; }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: #f5576c;
+      color: white;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .btn:hover { background: #d94560; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 120px;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #f5576c;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #374151;
+    }
+    .status {
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 8px;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Secret Message</h1>
+    <p class="subtitle">Vanilla JS + FHEVM SDK</p>
+    
+    <div id="app">
+      <div id="loading">Initializing FHEVM...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { FHEVMClient } from '@mixaspro/core'
+
+    const app = document.getElementById('app')
+    
+    async function init() {
+      const client = new FHEVMClient()
+      await client.initialize({
+        chainId: 11155111,
+        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com'
+      })
+
+      app.innerHTML = `
+        <label>Enter Secret Message:</label>
+        <textarea id="message" placeholder="Type your secret message..."></textarea>
+        <button id="encrypt-btn" class="btn">Encrypt Message</button>
+        <div id="status" style="display: none;" class="status"></div>
+      `
+
+      document.getElementById('encrypt-btn').addEventListener('click', async () => {
+        const message = document.getElementById('message').value
+        const status = document.getElementById('status')
+        
+        if (!message) {
+          alert('Please enter a message')
+          return
+        }
+
+        try {
+          status.textContent = 'Encrypting...'
+          status.style.display = 'block'
+          
+          // Convert message to number (simplified)
+          const numValue = message.length
+          const encrypted = await client.encrypt(numValue, 'euint32')
+          
+          status.textContent = `✅ Message encrypted! Handle: ${encrypted.handle.slice(0, 10)}...`
+        } catch (error) {
+          status.textContent = `❌ Error: ${error.message}`
+        }
+      })
+    }
+
+    init().catch(err => {
+      app.innerHTML = `<div class="status" style="display:block; background:#fee2e2; color:#991b1b;">Error: ${err.message}</div>`
+    })
+  </script>
+</body>
+</html>

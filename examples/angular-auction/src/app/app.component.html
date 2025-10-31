@@ -1,0 +1,101 @@
+<div class="container">
+  <header>
+    <h1>🔨 Blind Auction</h1>
+    <p class="subtitle">Angular + FHEVM SDK</p>
+  </header>
+
+  <div *ngIf="!isInitialized" class="loading">
+    Initializing FHEVM...
+  </div>
+
+  <ng-container *ngIf="isInitialized">
+    <div *ngIf="!walletAddress" class="wallet-section">
+      <button 
+        (click)="connectWallet()" 
+        [disabled]="isConnecting"
+        class="btn btn-primary"
+      >
+        {{ isConnecting ? 'Connecting...' : 'Connect Wallet' }}
+      </button>
+    </div>
+
+    <div *ngIf="walletAddress" class="main-content">
+      <div class="wallet-info">
+        <p><strong>Connected:</strong> {{ shortAddress(walletAddress) }}</p>
+        <button (click)="disconnectWallet()" class="btn btn-secondary">
+          Disconnect
+        </button>
+      </div>
+
+      <div class="auction-card">
+        <h2>{{ auctionItem.name }}</h2>
+        <p class="description">{{ auctionItem.description }}</p>
+        
+        <div class="auction-stats">
+          <div class="stat">
+            <span class="label">Current Highest Bid:</span>
+            <span class="value">{{ auctionItem.currentBid }}</span>
+          </div>
+          <div class="stat">
+            <span class="label">Time Left:</span>
+            <span class="value time">{{ auctionItem.timeLeft }}</span>
+          </div>
+        </div>
+
+        <div class="bid-section">
+          <h3>💰 Place Your Bid</h3>
+          <p class="bid-note">
+            Your bid is completely private. Other bidders cannot see your amount.
+          </p>
+          
+          <div class="bid-input-group">
+            <input 
+              type="number" 
+              [(ngModel)]="bidAmount"
+              placeholder="Enter bid amount"
+              class="input"
+              [disabled]="isBidding"
+            />
+            <span class="currency">ETH</span>
+          </div>
+
+          <button 
+            (click)="placeBid()" 
+            [disabled]="isBidding || !bidAmount"
+            class="btn btn-primary"
+          >
+            {{ isBidding ? 'Placing Bid...' : 'Place Private Bid' }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="bids.length > 0" class="bids-card">
+        <h3>📋 Your Bids</h3>
+        <div class="bids-list">
+          <div *ngFor="let bid of bids" class="bid-item" [class.confirmed]="bid.status === 'confirmed'">
+            <div class="bid-header">
+              <span class="bid-id">Bid #{{ bid.id }}</span>
+              <span class="bid-time">{{ getTimeSince(bid.timestamp) }}</span>
+            </div>
+            <div class="bid-details">
+              <span class="bid-amount">Amount: {{ bid.amount }}</span>
+              <span class="bid-status" [class.pending]="bid.status === 'pending'">
+                {{ bid.status === 'confirmed' ? '✓ Confirmed' : '⏳ Pending' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>ℹ️ How Blind Auctions Work</h3>
+        <ul>
+          <li>All bids are encrypted using FHE</li>
+          <li>Bidders cannot see each other's amounts</li>
+          <li>Winner is determined without revealing losing bids</li>
+          <li>Complete privacy for all participants</li>
+        </ul>
+      </div>
+    </div>
+  </ng-container>
+</div>

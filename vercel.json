@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm build && node scripts/prepare-vercel.js",
+  "outputDirectory": "public",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": null
+}
