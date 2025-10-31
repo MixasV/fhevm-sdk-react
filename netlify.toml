@@ -1,0 +1,12 @@
+[build]
+  command = "node scripts/build-for-vercel.js"
+  publish = "public"
+
+[build.environment]
+  NODE_VERSION = "18"
+  PNPM_VERSION = "8"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
