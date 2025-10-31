@@ -7,7 +7,10 @@ interface Bid {
   id: number
   timestamp: Date
   amount: string
+  encryptedHandle?: string
+  decryptedAmount?: bigint
   status: 'pending' | 'confirmed'
+  isDecrypting?: boolean
 }
 
 @Component({
@@ -97,7 +100,9 @@ export class AppComponent implements OnInit {
         id: this.bids.length + 1,
         timestamp: new Date(),
         amount: '***',
-        status: 'pending'
+        encryptedHandle: encrypted.handle,
+        status: 'pending',
+        isDecrypting: false
       }
       
       this.bids.unshift(newBid)
@@ -115,6 +120,28 @@ export class AppComponent implements OnInit {
     } finally {
       this.isBidding = false
     }
+  }
+
+  async revealBid(bid: Bid) {
+    if (!bid.encryptedHandle) {
+      alert('No encrypted bid to reveal')
+      return
+    }
+
+    bid.isDecrypting = true
+    
+    this.fhevm.decrypt(bid.encryptedHandle).subscribe({
+      next: (decrypted) => {
+        bid.decryptedAmount = decrypted as bigint
+        bid.amount = decrypted.toString()
+        bid.isDecrypting = false
+      },
+      error: (err) => {
+        console.error('Decryption failed:', err)
+        alert(`Failed to decrypt: ${err.message}`)
+        bid.isDecrypting = false
+      }
+    })
   }
 
   shortAddress(address: string): string {

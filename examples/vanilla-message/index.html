@@ -82,6 +82,7 @@
     import { FHEVMClient } from '@mixaspro/core'
 
     const app = document.getElementById('app')
+    let currentEncryptedHandle = null
     
     async function init() {
       const client = new FHEVMClient()
@@ -94,6 +95,11 @@
         <label>Enter Secret Message:</label>
         <textarea id="message" placeholder="Type your secret message..."></textarea>
         <button id="encrypt-btn" class="btn">Encrypt Message</button>
+        <div id="decrypt-section" style="display: none; margin-top: 1.5rem;">
+          <h3 style="margin-bottom: 1rem; color: #1f2937;">Decrypt Message</h3>
+          <button id="decrypt-btn" class="btn" style="background: #10b981;">🔓 Decrypt Message</button>
+          <div id="decrypt-result" style="display: none; margin-top: 1rem; padding: 1rem; background: #d1fae5; color: #065f46; border-radius: 8px;"></div>
+        </div>
         <div id="status" style="display: none;" class="status"></div>
       `
 
@@ -114,9 +120,57 @@
           const numValue = message.length
           const encrypted = await client.encrypt(numValue, 'euint32')
           
+          currentEncryptedHandle = encrypted.handle
+          
           status.textContent = `✅ Message encrypted! Handle: ${encrypted.handle.slice(0, 10)}...`
+          document.getElementById('decrypt-section').style.display = 'block'
         } catch (error) {
           status.textContent = `❌ Error: ${error.message}`
+        }
+      })
+
+      document.getElementById('decrypt-btn').addEventListener('click', async () => {
+        if (!currentEncryptedHandle) {
+          alert('Please encrypt a message first')
+          return
+        }
+
+        const decryptBtn = document.getElementById('decrypt-btn')
+        const decryptResult = document.getElementById('decrypt-result')
+        
+        try {
+          decryptBtn.textContent = 'Decrypting...'
+          decryptBtn.disabled = true
+          decryptResult.style.display = 'none'
+          
+          const instance = client.getInstance()
+          if (!instance) {
+            throw new Error('FHEVM instance not available')
+          }
+          
+          const results = await instance.publicDecrypt([currentEncryptedHandle])
+          const firstKey = Object.keys(results)[0]
+          
+          if (!firstKey) {
+            throw new Error('No decryption result returned')
+          }
+          
+          const decryptedValue = results[firstKey]
+          
+          decryptResult.innerHTML = `
+            <h4 style="margin-bottom: 0.5rem;">Decrypted Value:</h4>
+            <p style="font-size: 1.5rem; font-weight: bold;">${decryptedValue.toString()}</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">(Message length in characters)</p>
+          `
+          decryptResult.style.display = 'block'
+          decryptBtn.textContent = '✓ Decrypted'
+        } catch (error) {
+          decryptResult.innerHTML = `❌ Decryption failed: ${error.message}`
+          decryptResult.style.display = 'block'
+          decryptResult.style.background = '#fee2e2'
+          decryptResult.style.color = '#991b1b'
+          decryptBtn.textContent = '🔓 Try Again'
+          decryptBtn.disabled = false
         }
       })
     }

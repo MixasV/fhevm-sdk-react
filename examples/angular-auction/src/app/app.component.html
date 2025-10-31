@@ -83,6 +83,18 @@
                 {{ bid.status === 'confirmed' ? '✓ Confirmed' : '⏳ Pending' }}
               </span>
             </div>
+            <div *ngIf="bid.encryptedHandle && bid.status === 'confirmed'" class="bid-actions">
+              <button 
+                (click)="revealBid(bid)" 
+                [disabled]="bid.isDecrypting || bid.decryptedAmount !== undefined"
+                class="btn btn-reveal"
+              >
+                {{ bid.isDecrypting ? 'Decrypting...' : bid.decryptedAmount ? '✓ Revealed' : '🔓 Reveal Bid' }}
+              </button>
+              <div *ngIf="bid.decryptedAmount !== undefined" class="revealed-amount">
+                💰 {{ bid.decryptedAmount.toString() }} ETH
+              </div>
+            </div>
           </div>
         </div>
       </div>

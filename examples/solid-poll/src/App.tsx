@@ -2,6 +2,7 @@ import { createSignal, Show, For } from 'solid-js'
 import { FHEVMProvider, useFHEVM } from '@mixaspro/solid'
 import { createWallet } from '@mixaspro/solid'
 import { createEncrypt } from '@mixaspro/solid'
+import { createDecrypt } from '@mixaspro/solid'
 
 const POLL_ABI = [
   {
@@ -33,11 +34,14 @@ function PollContent() {
   const fhevm = useFHEVM()
   const wallet = createWallet()
   const encrypt = createEncrypt()
+  const decrypt = createDecrypt()
   
   const [selectedOption, setSelectedOption] = createSignal<number | null>(null)
   const [isVoting, setIsVoting] = createSignal(false)
   const [hasVoted, setHasVoted] = createSignal(false)
   const [txHash, setTxHash] = createSignal('')
+  const [encryptedHandle, setEncryptedHandle] = createSignal<string | null>(null)
+  const [decryptedVote, setDecryptedVote] = createSignal<bigint | null>(null)
 
   const handleConnect = async () => {
     try {
@@ -59,6 +63,11 @@ function PollContent() {
     try {
       const encrypted = await encrypt.encrypt(choice, 'euint32')
       
+      // Store handle for decryption
+      if (encrypted && encrypted.handle) {
+        setEncryptedHandle(encrypted.handle)
+      }
+      
       // In real app, would call contract
       setTxHash('0x1234567890abcdef')
       setHasVoted(true)
@@ -68,6 +77,22 @@ function PollContent() {
       alert(`Failed to vote: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsVoting(false)
+    }
+  }
+
+  const handleDecryptVote = async () => {
+    const handle = encryptedHandle()
+    if (!handle) {
+      alert('No encrypted vote to decrypt')
+      return
+    }
+
+    try {
+      const result = await decrypt.decrypt(handle)
+      setDecryptedVote(result as bigint)
+    } catch (error) {
+      console.error('Decryption failed:', error)
+      alert(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -152,6 +177,36 @@ function PollContent() {
                   🔒 Your choice is encrypted and cannot be viewed by anyone, 
                   including the contract owner.
                 </p>
+                
+                <Show when={encryptedHandle()}>
+                  <div class="decrypt-section">
+                    <h3>Verify Your Vote</h3>
+                    <p>Decrypt to verify your encrypted vote value</p>
+                    <button
+                      onClick={handleDecryptVote}
+                      disabled={decrypt.isDecrypting()}
+                      class="btn btn-decrypt"
+                    >
+                      {decrypt.isDecrypting() ? 'Decrypting...' : '🔓 Decrypt My Vote'}
+                    </button>
+                    
+                    <Show when={decrypt.error()}>
+                      <div class="error-message">
+                        ❌ {decrypt.error()!.message}
+                      </div>
+                    </Show>
+                    
+                    <Show when={decryptedVote() !== null}>
+                      <div class="decrypted-result">
+                        <h4>Decrypted Vote:</h4>
+                        <p class="vote-choice">
+                          {pollOptions[Number(decryptedVote())]?.title || 'Unknown'}
+                        </p>
+                        <p class="vote-id">Value: {decryptedVote()!.toString()}</p>
+                      </div>
+                    </Show>
+                  </div>
+                </Show>
               </div>
             </Show>
 

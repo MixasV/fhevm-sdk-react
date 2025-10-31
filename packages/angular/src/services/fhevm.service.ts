@@ -211,7 +211,7 @@ export class FHEVMService implements OnDestroy {
   /**
    * Decrypt a ciphertext
    * 
-   * @param ciphertext - Ciphertext to decrypt
+   * @param ciphertext - Ciphertext to decrypt (Uint8Array or string handle)
    * @param timeout - Timeout in milliseconds
    * @returns Observable of decrypted value
    * 
@@ -223,7 +223,7 @@ export class FHEVMService implements OnDestroy {
    * )
    * ```
    */
-  decrypt(ciphertext: Uint8Array, timeout = 30000): Observable<bigint | boolean> {
+  decrypt(ciphertext: Uint8Array | string, timeout = 30000): Observable<bigint | boolean> {
     if (this.client === null || this.client === undefined) {
       return throwError(() => new Error('FHEVM client not initialized')) as Observable<never>
     }
@@ -237,14 +237,27 @@ export class FHEVMService implements OnDestroy {
     )
   }
 
-  private async decryptAsync(ciphertext: Uint8Array, timeout: number): Promise<bigint | boolean> {
+  private async decryptAsync(ciphertext: Uint8Array | string, timeout: number): Promise<bigint | boolean> {
     if (this.client === null || this.client === undefined) {
       throw new Error('FHEVM client not initialized')
     }
 
-    const request = await this.client.requestDecryption(ciphertext)
-    const result = await this.client.waitForDecryption(request.id, timeout)
-    return result.value
+    const instance = this.client.getInstance()
+    if (!instance) {
+      throw new Error('FHEVM instance not available')
+    }
+
+    // Use relayer-sdk publicDecrypt
+    const handle = typeof ciphertext === 'string' ? ciphertext : ciphertext
+    const results = await instance.publicDecrypt([handle])
+    
+    // Get first result
+    const firstKey = Object.keys(results)[0]
+    if (!firstKey) {
+      throw new Error('No decryption result returned')
+    }
+    
+    return results[firstKey] as bigint | boolean
   }
 
   /**

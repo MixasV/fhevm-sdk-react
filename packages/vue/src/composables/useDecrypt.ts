@@ -75,19 +75,33 @@ export function useDecrypt(): UseDecryptReturn {
   /**
    * Decrypt ciphertext
    */
-  async function decrypt(ciphertext: Uint8Array, timeout = 30000): Promise<bigint | boolean> {
+  async function decrypt(ciphertext: Uint8Array | string, timeout = 30000): Promise<bigint | boolean> {
     if (client === null || client === undefined) {
       throw new Error('FHEVM client not initialized')
+    }
+
+    const instance = client.getInstance()
+    if (!instance) {
+      throw new Error('FHEVM instance not available')
     }
 
     isDecrypting.value = true
     error.value = null
 
     try {
-      const request = await client.requestDecryption(ciphertext)
-      const result = await client.waitForDecryption(request.id, timeout)
-      data.value = result.value
-      return result.value
+      // Use relayer-sdk publicDecrypt
+      const handle = typeof ciphertext === 'string' ? ciphertext : ciphertext
+      const results = await instance.publicDecrypt([handle])
+      
+      // Get first result
+      const firstKey = Object.keys(results)[0]
+      if (!firstKey) {
+        throw new Error('No decryption result returned')
+      }
+      
+      const value = results[firstKey]
+      data.value = value as bigint | boolean
+      return value as bigint | boolean
     } catch (err) {
       error.value = err instanceof Error ? err : new Error('Decryption failed')
       throw error.value

@@ -26,7 +26,7 @@ export const decryptedData: Writable<bigint | boolean | null> = writable(null)
 /**
  * Decrypt a ciphertext
  * 
- * @param ciphertext - Ciphertext to decrypt
+ * @param ciphertext - Ciphertext to decrypt (Uint8Array or string handle)
  * @param timeout - Timeout in milliseconds (default: 30000)
  * @returns Promise resolving to decrypted value
  * 
@@ -39,7 +39,7 @@ export const decryptedData: Writable<bigint | boolean | null> = writable(null)
  * ```
  */
 export async function decrypt(
-  ciphertext: Uint8Array,
+  ciphertext: Uint8Array | string,
   timeout = 30000
 ): Promise<bigint | boolean> {
   return new Promise<bigint | boolean>((resolve, reject) => {
@@ -57,18 +57,30 @@ export async function decrypt(
           return
         }
 
+        const instance = client.getInstance()
+        if (!instance) {
+          reject(new Error('FHEVM instance not available'))
+          unsubscribe()
+          return
+        }
+
         isDecrypting.set(true)
         decryptionError.set(null)
 
         try {
-          // Request decryption
-          const request = await client.requestDecryption(ciphertext)
+          // Use relayer-sdk publicDecrypt
+          const handle = typeof ciphertext === 'string' ? ciphertext : ciphertext
+          const results = await instance.publicDecrypt([handle])
           
-          // Wait for result
-          const result = await client.waitForDecryption(request.id, timeout)
+          // Get first result
+          const firstKey = Object.keys(results)[0]
+          if (!firstKey) {
+            throw new Error('No decryption result returned')
+          }
           
-          decryptedData.set(result.value)
-          resolve(result.value)
+          const value = results[firstKey]
+          decryptedData.set(value as bigint | boolean)
+          resolve(value as bigint | boolean)
         } catch (error) {
           const err = error instanceof Error ? error : new Error('Decryption failed')
           decryptionError.set(err)

@@ -1,0 +1,45 @@
+# Source files
+src/
+test/
+tests/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Config files
+tsconfig.json
+tsconfig.*.json
+.eslintrc.json
+.prettierrc.json
+.prettierignore
+turbo.json
+pnpm-workspace.yaml
+
+# Build artifacts
+coverage/
+.turbo/
+.cache/
+
+# Documentation
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE.md
+
+# Development files
+.husky/
+.vscode/
+.idea/
+examples/
+scripts/
+
+# Environment
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+.gitattributes

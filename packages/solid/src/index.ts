@@ -11,6 +11,7 @@ export * from './context'
 
 // Primitives
 export * from './primitives/createEncrypt'
+export * from './primitives/createDecrypt'
 export * from './primitives/createWallet'
 export * from './primitives/createContract'
 
